@@ -1,11 +1,6 @@
-import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  Validators,
-  AbstractControl,
-  ValidationErrors,
-} from '@angular/forms';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { AuthPanelComponent } from './auth-panel/auth-panel.component';
+import { FeatureCardComponent } from './feature-card/feature-card.component';
 
 interface Conversation {
   id: number;
@@ -13,10 +8,12 @@ interface Conversation {
   description: string;
 }
 
-function passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
-  const password = group.get('password')?.value;
-  const confirm = group.get('confirmPassword')?.value;
-  return password === confirm ? null : { passwordsMismatch: true };
+interface Feature {
+  id: string;
+  title: string;
+  description: string;
+  bgClass: string;
+  imgSrc: string;
 }
 
 @Component({
@@ -24,17 +21,13 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule],
+  imports: [AuthPanelComponent, FeatureCardComponent],
   host: { class: 'flex h-screen bg-white overflow-hidden' },
 })
 export class App {
-  private readonly fb = inject(FormBuilder);
-
   readonly activeNav = signal('Conversations');
   readonly message = signal('');
   readonly openMenuId = signal<number | null>(null);
-  readonly loginOpen = signal(false);
-  readonly authTab = signal<'login' | 'register'>('login');
 
   readonly navItems = ['Conversations', 'My documents', 'Legal library', 'Live consultants'] as const;
 
@@ -56,20 +49,40 @@ export class App {
     },
   ]);
 
-  readonly loginForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-  });
-
-  readonly registerForm = this.fb.group(
+  readonly features: Feature[] = [
     {
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', Validators.required],
+      id: 'chat',
+      title: 'Start with a conversation',
+      description:
+        'Ask any legal question, ask to create a document for you, or upload your own document, to work with it and find paragraphs to pay attention to or adjust',
+      bgClass: 'bg-blue-100',
+      imgSrc: 'assets/chatbot.png',
     },
-    { validators: passwordsMatchValidator }
-  );
+    {
+      id: 'docs',
+      title: 'Store documents',
+      description:
+        'With all adjustments, and organize them for further work. At any stage of working with your document you can click "Save to My Documents, and proceed later.',
+      bgClass: 'bg-amber-100',
+      imgSrc: 'assets/distributed.png',
+    },
+    {
+      id: 'library',
+      title: 'Explore the legal library',
+      description:
+        'In the process of a conversation, Legal Bot will give you links to a vast library of cases, laws and law enforcement practice. Bookmark it, or explore manually.',
+      bgClass: 'bg-violet-100',
+      imgSrc: 'assets/folder.png',
+    },
+    {
+      id: 'pros',
+      title: 'Hire live law professionals',
+      description:
+        'Our service provides powerful AI, based on vast legal library. But if any questions left — we have a wide range of law consultants, to clarify anything you may need',
+      bgClass: 'bg-green-100',
+      imgSrc: 'assets/information-management.png',
+    },
+  ];
 
   setActiveNav(item: string): void {
     this.activeNav.set(item);
@@ -77,41 +90,11 @@ export class App {
 
   toggleMenu(id: number, event: Event): void {
     event.stopPropagation();
-    this.loginOpen.set(false);
     this.openMenuId.update((current) => (current === id ? null : id));
   }
 
-  toggleLogin(event: Event): void {
-    event.stopPropagation();
+  closeMenus(): void {
     this.openMenuId.set(null);
-    this.loginOpen.update((v) => !v);
-  }
-
-  setAuthTab(tab: 'login' | 'register'): void {
-    this.authTab.set(tab);
-  }
-
-  closeAllOverlays(): void {
-    this.openMenuId.set(null);
-    this.loginOpen.set(false);
-  }
-
-  submitLogin(): void {
-    if (this.loginForm.valid) {
-      this.loginOpen.set(false);
-      this.loginForm.reset();
-    } else {
-      this.loginForm.markAllAsTouched();
-    }
-  }
-
-  submitRegister(): void {
-    if (this.registerForm.valid) {
-      this.loginOpen.set(false);
-      this.registerForm.reset();
-    } else {
-      this.registerForm.markAllAsTouched();
-    }
   }
 
   onMessageInput(event: Event): void {

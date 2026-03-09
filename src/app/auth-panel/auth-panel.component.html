@@ -1,0 +1,81 @@
+<div class="relative shrink-0">
+
+  <!-- Toggle button -->
+  <button
+    type="button"
+    class="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+    [attr.aria-expanded]="loginOpen()"
+    aria-haspopup="dialog"
+    (click)="toggle($event)"
+  >
+    Log in
+    <svg
+      class="w-3.5 h-3.5 text-gray-500 transition-transform"
+      [class.rotate-180]="loginOpen()"
+      viewBox="0 0 12 12"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M2 4l4 4 4-4"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </button>
+
+  <!-- Dropdown panel -->
+  @if (loginOpen()) {
+    <div
+      class="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl z-30 p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Authentication"
+      (click)="$event.stopPropagation()"
+    >
+
+      <!-- Tab switcher -->
+      <div class="flex gap-1 bg-gray-100 rounded-xl p-1 mb-5" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="authTab() === 'login'"
+          class="{{ authTab() === 'login'
+            ? 'flex-1 py-2 rounded-lg text-sm font-semibold bg-white text-gray-900 shadow-sm'
+            : 'flex-1 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors' }}"
+          (click)="setTab('login')"
+        >
+          Log in
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="authTab() === 'register'"
+          class="{{ authTab() === 'register'
+            ? 'flex-1 py-2 rounded-lg text-sm font-semibold bg-white text-gray-900 shadow-sm'
+            : 'flex-1 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors' }}"
+          (click)="setTab('register')"
+        >
+          Register
+        </button>
+      </div>
+
+      @if (authTab() === 'login') {
+        <app-login-form
+          (submitted)="onLoginSubmitted()"
+          (switchToRegister)="setTab('register')"
+        />
+      }
+
+      @if (authTab() === 'register') {
+        <app-register-form
+          (submitted)="onRegisterSubmitted()"
+          (switchToLogin)="setTab('login')"
+        />
+      }
+
+    </div>
+  }
+</div>
