@@ -76,9 +76,9 @@ export class App {
     },
     {
       id: 'pros',
-      title: 'Hire live law professionals',
+      title: 'Retreive insightful information',
       description:
-        'Our service provides powerful AI, based on vast legal library. But if any questions left — we have a wide range of law consultants, to clarify anything you may need',
+        'Our service provides powerful AI, based on vast books, document. If you want to verify your contract, doutbful if your description fully express your thought , this tool is to clarify anything you may need',
       bgClass: 'bg-green-100',
       imgSrc: 'assets/information-management.png',
     },

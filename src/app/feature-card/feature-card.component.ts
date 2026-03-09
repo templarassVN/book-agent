@@ -1,8 +1,13 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
+import { TiltDirective } from '../tilt/tilt.directive';
 
 @Component({
   selector: 'app-feature-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [TiltDirective],
+  host: {
+    class: 'block h-full rounded-3xl',
+  },
   template: `
     <article
       [class]="'rounded-3xl p-5 flex gap-4 items-center h-full ' + bgClass()"
