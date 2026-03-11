@@ -1,6 +1,9 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { AuthPanelComponent } from './auth-panel/auth-panel.component';
 import { FeatureCardComponent } from './feature-card/feature-card.component';
+import { ClaudeService } from './services/claude.service';
+import { MarkdownComponent } from 'ngx-markdown';
+import { BookRecommendationListComponent } from './book-recommendation-list/book-recommendation-list.component';
 
 interface Conversation {
   id: number;
@@ -21,10 +24,12 @@ interface Feature {
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AuthPanelComponent, FeatureCardComponent],
+  imports: [AuthPanelComponent, FeatureCardComponent, MarkdownComponent, BookRecommendationListComponent],
   host: { class: 'flex h-screen bg-white overflow-hidden' },
 })
 export class App {
+  readonly claude = inject(ClaudeService);
+
   readonly activeNav = signal('Conversations');
   readonly message = signal('');
   readonly openMenuId = signal<number | null>(null);
@@ -102,9 +107,10 @@ export class App {
   }
 
   sendMessage(): void {
-    if (this.message().trim()) {
-      this.message.set('');
-    }
+    const text = this.message().trim();
+    if (!text || this.claude.isLoading()) return;
+    this.message.set('');
+    this.claude.sendMessage(text);
   }
 
   handleInputKeydown(event: KeyboardEvent): void {
