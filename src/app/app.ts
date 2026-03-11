@@ -1,9 +1,10 @@
-import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, computed } from '@angular/core';
 import { AuthPanelComponent } from './auth-panel/auth-panel.component';
 import { FeatureCardComponent } from './feature-card/feature-card.component';
 import { ClaudeService } from './services/claude.service';
 import { MarkdownComponent } from 'ngx-markdown';
 import { BookRecommendationListComponent } from './book-recommendation-list/book-recommendation-list.component';
+import { ChatQuestionComponent } from './chat-question/chat-question.component';
 
 interface Conversation {
   id: number;
@@ -24,11 +25,22 @@ interface Feature {
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AuthPanelComponent, FeatureCardComponent, MarkdownComponent, BookRecommendationListComponent],
+  imports: [AuthPanelComponent, FeatureCardComponent, MarkdownComponent, BookRecommendationListComponent, ChatQuestionComponent],
   host: { class: 'flex h-screen bg-white overflow-hidden' },
 })
 export class App {
   readonly claude = inject(ClaudeService);
+
+  readonly pendingQuestion = computed(() => {
+    const msgs = this.claude.messages();
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      const msg = msgs[i];
+      if (msg.role === 'assistant' && msg.question && !msg.answered) {
+        return { index: i, question: msg.question };
+      }
+    }
+    return null;
+  });
 
   readonly activeNav = signal('Conversations');
   readonly message = signal('');
@@ -118,5 +130,14 @@ export class App {
       event.preventDefault();
       this.sendMessage();
     }
+  }
+
+  onAnswer(messageIndex: number, answer: string): void {
+    this.claude.markAnswered(messageIndex);
+    this.claude.sendMessage(answer);
+  }
+
+  onSkip(messageIndex: number): void {
+    this.claude.markAnswered(messageIndex);
   }
 }

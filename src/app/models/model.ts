@@ -16,3 +16,13 @@ export const IRecommendationSource = `
     gerne: string
 }`;
 
+export interface IQuestion {
+    question: string,
+    answers: string[]
+}
+
+export const IQuestionSource = `
+{
+    question: string,
+    answers: string[]
+}`;
